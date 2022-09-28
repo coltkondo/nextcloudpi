@@ -12,11 +12,23 @@ source /usr/local/etc/library.sh
 
 set -e$DBG
 
+
+if is_docker
+then
+  echo "WARNING: Docker images should be updated by replacing the container from the latest docker image" \
+    "(refer to the documentation for instructions: https://docs.nextcloudpi.com)." \
+    "If you are sure that you know what you are doing, you can still execute the update script by running it like this:"
+  echo "> ALLOW_UPDATE_SCRIPT=1 ncp-update"
+  [[ "$ALLOW_UPDATE_SCRIPT" == "1" ]] || exit 1
+fi
+
 CONFDIR=/usr/local/etc/ncp-config.d/
 UPDATESDIR=updates
 
 # don't make sense in a docker container
 EXCL_DOCKER="
+nc-autoupdate-ncp
+nc-update
 nc-automount
 nc-format-USB
 nc-datadir
@@ -173,6 +185,8 @@ fi
 
 # update to the latest NC version
 is_active_app nc-autoupdate-nc && run_app nc-autoupdate-nc
+
+start_notify_push
 
 # Refresh ncp config values
 source /usr/local/etc/library.sh
